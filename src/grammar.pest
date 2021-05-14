@@ -1,0 +1,55 @@
+
+// Operators with their groups, sorted by priority 
+//============================================================
+op_group_logical = { op_or | op_and | op_xor }
+op_or = { "or" }
+op_and = {"and" }
+op_xor = {"xor" }
+
+op_group_binary =  { op_eq | op_ne | op_ge | op_le | op_gt | op_lt | op_in }
+op_eq = {"==" | "=" }
+op_ne = { "!="}
+op_ge= { ">="}
+op_le = { "<="}
+op_gt = { ">" }
+op_lt = { "<" }
+op_in = { "in" }
+
+op_group_exp =  _{op_exp}
+op_exp = { "^" }
+
+op_group_mul =  _{op_mul | op_div | op_mod}
+op_mul = { "*" } 
+op_div = { "/" }
+op_mod = { "%" }
+
+op_group_plus =  {op_plus | op_minus}
+op_plus = { "+"}
+op_minus = { "-"}
+
+
+// Primitive values
+primitive = {
+    int_lit
+}
+
+// Int literal
+int_lit = { "-"? ~ dec_digits }
+dec_digits = _{ ASCII_DIGIT+ }
+
+//Variables
+ident = _{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
+var = @{ ident ~ ("." ~ ident)* }
+
+fun = { ASCII_ALPHA+ ~ "(" ~ expr ~ ("," ~ expr)* ~ ")"}
+
+expr = _{expr_plus}
+
+expr_plus = {expr_mul ~ (op_group_plus ~ expr_mul )* }
+expr_mul = { expr_exp ~ ( op_group_mul ~ expr_exp )* }
+expr_exp = { expr_base ~ ( op_group_exp ~ expr_base )* }
+expr_base =  {fun | primitive | var | parenthesis}  
+parenthesis = _{"(" ~ expr ~ ")"}
+
+formula = { SOI ~ expr ~ EOI }
+WHITESPACE = _{ " " | NEWLINE | "\t"}
