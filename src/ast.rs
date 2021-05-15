@@ -22,45 +22,51 @@ pub struct Step {
 }
 pub type Ast = Vec<Step>;
 
-pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>, depth: i32) -> usize {
+pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>) -> usize {
     let rule = token.as_rule();
     match rule {
-        Rule::expr_plus | Rule::expr_mul | Rule::expr_exp => extract_expr(ast, token, depth),
+        Rule::expr_plus | Rule::expr_mul | Rule::expr_exp => extract_expr(ast, token),
         Rule::int_lit => {
+            let n_str = token.as_str();
+            //println!("{:?}", n_str);
             ast.push(Step {
                 rule: Rule::int_lit,
-                value: BigInt::parse_bytes(token.as_str().as_bytes(), 10),
+                value: BigInt::parse_bytes(n_str.as_bytes(), 10),
                 inputs: vec![],
             });
         }
         _ => {
-            walk_ast(ast, token.into_inner().next().unwrap(), depth + 1);
+            walk_ast(ast, token.into_inner().next().unwrap()); // next inner token
         }
     };
     ast.len() - 1
 }
 
-fn extract_expr(ast: &mut Ast, tokens: Pair<Rule>, depth: i32) {
-    println!("{:?}", tokens.as_rule());
-    let is_reversed = tokens.as_rule() == Rule::expr_exp;
+fn extract_expr(ast: &mut Ast, parent_token: Pair<Rule>) {
+    let is_reversed = parent_token.as_rule() == Rule::expr_exp;
     let ordered_tokens: Vec<Pair<Rule>> = if is_reversed {
-        tokens.into_inner().rev().collect()
+        parent_token.into_inner().rev().collect()
     } else {
-        tokens.into_inner().collect()
+        parent_token.into_inner().collect()
     };
     ordered_tokens.into_iter().enumerate().fold(
-        (0usize, Rule::expr),
+        (0usize, Rule::expr), // default values, will change before being used
         |(left_hand, operation), (idx, token)| match idx {
-            0 => (walk_ast(ast, token, depth + 1), operation),
+            0 => (walk_ast(ast, token), operation),
             _ if idx % 2 == 1 => (left_hand, token.as_rule()),
             _ => {
-                let right_hand = walk_ast(ast, token, depth + 1);
+                let right_hand = walk_ast(ast, token);
+                let inputs = if is_reversed {
+                    vec![right_hand, left_hand]
+                } else {
+                    vec![left_hand, right_hand]
+                };
                 ast.push(Step {
                     rule: operation,
                     value: None,
-                    inputs: vec![left_hand, right_hand],
+                    inputs: inputs,
                 });
-                (ast.len(), operation)
+                (ast.len() - 1, operation)
             }
         },
     );
@@ -69,6 +75,6 @@ fn extract_expr(ast: &mut Ast, tokens: Pair<Rule>, depth: i32) {
 pub fn generate(formula: &str) -> Ast {
     let tokens = parse(formula);
     let mut ast: Ast = Vec::new();
-    walk_ast(&mut ast, tokens, 0);
+    walk_ast(&mut ast, tokens);
     ast
 }

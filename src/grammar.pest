@@ -34,14 +34,15 @@ primitive = {
 }
 
 // Int literal
-int_lit = { "-"? ~ dec_digits }
+int_lit = ${ "-"? ~ dec_digits }
 dec_digits = _{ ASCII_DIGIT+ }
 
 //Variables
 ident = _{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 var = @{ ident ~ ("." ~ ident)* }
 
-fun = { ASCII_ALPHA+ ~ "(" ~ expr ~ ("," ~ expr)* ~ ")"}
+arguments = {expr ~ ("," ~ expr)* }
+fun = ${ ASCII_ALPHA+ ~ "(" ~ arguments ~ ")"}
 
 expr = _{expr_plus}
 

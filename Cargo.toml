@@ -1,5 +1,5 @@
 [package]
-name = "fibo-machine"
+name = "fibomachine"
 version = "0.1.0"
 authors = ["tourtiere"]
 
@@ -9,3 +9,4 @@ authors = ["tourtiere"]
 pest = "2.1.3"
 pest_derive = "2.0"
 num-bigint = "0.4.0"
+clap = "2.33.3"
