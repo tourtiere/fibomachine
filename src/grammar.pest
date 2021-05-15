@@ -23,7 +23,7 @@ op_mul = { "*" }
 op_div = { "/" }
 op_mod = { "%" }
 
-op_group_plus =  {op_plus | op_minus}
+op_group_plus =  _{op_plus | op_minus}
 op_plus = { "+"}
 op_minus = { "-"}
 

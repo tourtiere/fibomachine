@@ -22,39 +22,25 @@ pub struct Step {
 }
 pub type Ast = Vec<Step>;
 
-pub fn walk_ast(ast: &mut Ast, tokens: Pair<Rule>, depth: i32) -> usize {
-    let parent_rule = tokens.as_rule();
-
-    for token in tokens.into_inner().into_iter() {
-        let rule = token.as_rule();
-        println!(
-            "{}:{:?}",
-            (0..depth).map(|_| "|  ").collect::<String>(),
-            rule
-        );
-        match rule {
-            Rule::expr_plus | Rule::expr_mul | Rule::expr_exp => extract_expr(ast, token, depth),
-            Rule::int_lit => {
-                ast.push(Step {
-                    rule: Rule::int_lit,
-                    value: BigInt::parse_bytes(token.as_str().as_bytes(), 10),
-                    inputs: vec![],
-                });
-                ast.len()
-            }
-            _ => walk_ast(ast, token, depth + 1),
-        };
-    }
-    if ast.len() > 0 {
-        ast.len() - 1
-    } else {
-        0
-    }
+pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>, depth: i32) -> usize {
+    let rule = token.as_rule();
+    match rule {
+        Rule::expr_plus | Rule::expr_mul | Rule::expr_exp => extract_expr(ast, token, depth),
+        Rule::int_lit => {
+            ast.push(Step {
+                rule: Rule::int_lit,
+                value: BigInt::parse_bytes(token.as_str().as_bytes(), 10),
+                inputs: vec![],
+            });
+        }
+        _ => {
+            walk_ast(ast, token.into_inner().next().unwrap(), depth + 1);
+        }
+    };
+    ast.len() - 1
 }
 
-// TODO : dont return walk_ast. If child token is operator, extract_expr directly
-// otherwise, an operation level will skip.
-fn extract_expr(ast: &mut Ast, tokens: Pair<Rule>, depth: i32) -> usize {
+fn extract_expr(ast: &mut Ast, tokens: Pair<Rule>, depth: i32) {
     println!("{:?}", tokens.as_rule());
     let is_reversed = tokens.as_rule() == Rule::expr_exp;
     let ordered_tokens: Vec<Pair<Rule>> = if is_reversed {
@@ -62,31 +48,22 @@ fn extract_expr(ast: &mut Ast, tokens: Pair<Rule>, depth: i32) -> usize {
     } else {
         tokens.into_inner().collect()
     };
-    ordered_tokens
-        .into_iter()
-        .enumerate()
-        .fold(
-            (0usize, Rule::expr),
-            |(left_hand, operation), (idx, token)| {
-                if idx == 0 {
-                    //println!("{:?}", operation);
-                    return (walk_ast(ast, token, depth + 1), operation);
-                }
-                // is an operator
-                if idx % 2 == 1 {
-                    return (left_hand, token.as_rule());
-                }
-                // is a term
+    ordered_tokens.into_iter().enumerate().fold(
+        (0usize, Rule::expr),
+        |(left_hand, operation), (idx, token)| match idx {
+            0 => (walk_ast(ast, token, depth + 1), operation),
+            _ if idx % 2 == 1 => (left_hand, token.as_rule()),
+            _ => {
                 let right_hand = walk_ast(ast, token, depth + 1);
                 ast.push(Step {
                     rule: operation,
                     value: None,
                     inputs: vec![left_hand, right_hand],
                 });
-                return (ast.len(), operation);
-            },
-        )
-        .0
+                (ast.len(), operation)
+            }
+        },
+    );
 }
 
 pub fn generate(formula: &str) -> Ast {
