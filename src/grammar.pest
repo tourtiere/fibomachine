@@ -1,12 +1,12 @@
 
 // Operators with their groups, sorted by priority 
 //============================================================
-op_group_logical = { op_or | op_and | op_xor }
+op_group_logical = _{ op_or | op_and | op_xor }
 op_or = { "or" }
 op_and = {"and" }
 op_xor = {"xor" }
 
-op_group_binary =  { op_eq | op_ne | op_ge | op_le | op_gt | op_lt | op_in }
+op_group_binary =  _{ op_eq | op_ne | op_ge | op_le | op_gt | op_lt | op_in }
 op_eq = {"==" | "=" }
 op_ne = { "!="}
 op_ge= { ">="}
@@ -42,13 +42,19 @@ ident = _{ ASCII_ALPHA ~ ASCII_ALPHANUMERIC* }
 var = @{ ident ~ ("." ~ ident)* }
 
 arguments = {expr ~ ("," ~ expr)* }
-fun = ${ ASCII_ALPHA+ ~ "(" ~ arguments ~ ")"}
 
-expr = _{expr_plus}
+//fun_start = ${ASCII_ALPHA+ ~ "("}
 
+fun = { ASCII_ALPHA+ ~ "(" ~ arguments ~ ")"}
+
+expr = _{expr_logical}
+
+expr_logical = { expr_binary ~ ( op_group_logical ~ expr_binary )* }
+expr_binary = { expr_plus ~ ( op_group_binary ~ expr_plus )* }
 expr_plus = {expr_mul ~ (op_group_plus ~ expr_mul )* }
 expr_mul = { expr_exp ~ ( op_group_mul ~ expr_exp )* }
 expr_exp = { expr_base ~ ( op_group_exp ~ expr_base )* }
+
 expr_base =  {fun | primitive | var | parenthesis}  
 parenthesis = _{"(" ~ expr ~ ")"}
 

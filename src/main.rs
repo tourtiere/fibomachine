@@ -4,9 +4,9 @@ extern crate pest;
 extern crate pest_derive;
 extern crate clap;
 use clap::{App, Arg, ArgMatches};
+use num_bigint::BigInt;
 
 pub mod ast;
-
 pub mod engine;
 
 fn extract_commandline_args<'a>() -> ArgMatches<'a> {
@@ -16,28 +16,65 @@ fn extract_commandline_args<'a>() -> ArgMatches<'a> {
         .get_matches()
 }
 
-use num_bigint::BigInt;
-
 #[allow(dead_code)]
 fn print_ast(ast: &ast::Ast) {
     for (idx, step) in ast.iter().enumerate() {
         println!("{} - {:?}", idx, step);
     }
 }
-pub fn run(formula: &str) -> Option<BigInt> {
-    let ast = ast::generate(formula);
-    engine::excute(ast)
+
+fn parse_first_terms(stack: &str) -> engine::Sequence {
+    let mut seq: engine::Sequence = Vec::new();
+    for term in stack.split(",") {
+        //println!("{}", term);
+        let number = BigInt::parse_bytes(term.as_bytes(), 10).unwrap();
+        seq.push(ast::Step::Number { value: number });
+    }
+    seq
+}
+
+fn first_parse(input: &str) -> (ast::Ast, engine::Sequence) {
+    let limit = input.find(";").unwrap();
+    return (
+        ast::generate(&input[0..limit]),
+        parse_first_terms(&input[limit + 1..]),
+    );
+}
+
+fn step_to_str(step: ast::Step) -> String {
+    match step {
+        ast::Step::Number { value } => value.to_string(),
+        ast::Step::Boolean { value } => {
+            if value {
+                String::from("true")
+            } else {
+                String::from("false")
+            }
+        }
+        ast::Step::String { value } => value,
+        _ => String::from(""),
+    }
+}
+
+pub fn run(input: &str) -> String {
+    let (mut ast, mut first_terms) = first_parse(input);
+    print_ast(&ast);
+    let sequence = engine::execute(&ast, &mut first_terms);
+    for term in sequence {
+        println!("{}", step_to_str(term.clone()))
+    }
+    String::from("")
 }
 
 fn main() {
     let matches = extract_commandline_args();
     let formula = matches.value_of("EXPRESSION").unwrap();
-    println!("{}", run(formula).unwrap().to_string());
+    println!("{}", run(formula));
 }
 
 #[test]
 fn check_formula() {
-    assert_eq!(run("17/3 + 5*3 - 11").unwrap().to_string(), "9");
+    assert_eq!(run("17/3 + 5*3 - 11"), "9");
 }
 #[test]
 fn check_big_int() {
@@ -45,5 +82,5 @@ fn check_big_int() {
     let den = "1007242982";
     let result = "69508958386265170914785403829903557766978";
     let formula = &format!("{}/{}", num, den);
-    assert_eq!(run(formula).unwrap().to_string(), result);
+    assert_eq!(run(formula), result);
 }

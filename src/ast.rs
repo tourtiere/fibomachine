@@ -14,38 +14,47 @@ pub fn parse(formula: &str) -> Pair<Rule> {
         .unwrap()
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Step {
+    //Values
     Number { value: BigInt },
     String { value: String },
-    Function { value: String, inputs: Vec<usize> },
+    Boolean { value: bool },
+    Var { name: String },
+    // Functions
+    Function { name: String, inputs: Vec<usize> },
     Operation { value: Rule, inputs: Vec<usize> },
 }
 
-/*
-#[derive(Debug)]
-
-pub struct Step {
-    pub value: StepValue,
-    pub inputs: Vec<usize>,
-}
- */
 pub type Ast = Vec<Step>;
 
 pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>) -> usize {
     let rule = token.as_rule();
     match rule {
-        Rule::expr_plus | Rule::expr_mul | Rule::expr_exp => extract_expr(ast, token),
+        Rule::expr_plus
+        | Rule::expr_mul
+        | Rule::expr_exp
+        | Rule::expr_logical
+        | Rule::expr_binary => extract_expr(ast, token),
         Rule::fun => {
-            let value = String::from(token.as_str());
-            let child = token.into_inner().next().unwrap();
-            let inputs = extract_fun_arguments(ast, child);
-            ast.push(Step::Function { value, inputs });
+            let total_match = token.as_str();
+            let crop = total_match.find("(").unwrap();
+            let name = String::from(&total_match[0..crop]);
+
+            let mut pairs = token.into_inner();
+            //let _ = pairs.next().unwrap();
+            let second = pairs.next().unwrap();
+
+            let inputs = extract_fun_arguments(ast, second);
+            ast.push(Step::Function { name, inputs });
         }
         Rule::int_lit => {
-            let n_str = token.as_str();
-            let value = BigInt::parse_bytes(n_str.as_bytes(), 10).unwrap();
+            let value = BigInt::parse_bytes(token.as_str().as_bytes(), 10).unwrap();
             ast.push(Step::Number { value });
+        }
+        Rule::var => {
+            let name = String::from(token.as_str());
+            ast.push(Step::Var { name });
         }
         _ => {
             walk_ast(ast, token.into_inner().next().unwrap()); // next inner token
@@ -89,8 +98,6 @@ fn extract_fun_arguments(ast: &mut Ast, token: Pair<Rule>) -> Vec<usize> {
         .map(|token| walk_ast(ast, token))
         .collect()
 }
-
-////fn alternate(ast: &mut Ast, token: Pair<Rule>, odd: fn(i32) -> i32, even: fn(i32) -> i32) {}
 
 pub fn generate(formula: &str) -> Ast {
     let tokens = parse(formula);
