@@ -15,25 +15,37 @@ pub fn parse(formula: &str) -> Pair<Rule> {
 }
 
 #[derive(Debug)]
+pub enum Step {
+    Number { value: BigInt },
+    String { value: String },
+    Function { value: String, inputs: Vec<usize> },
+    Operation { value: Rule, inputs: Vec<usize> },
+}
+
+/*
+#[derive(Debug)]
+
 pub struct Step {
-    pub rule: Rule,
-    pub value: Option<BigInt>,
+    pub value: StepValue,
     pub inputs: Vec<usize>,
 }
+ */
 pub type Ast = Vec<Step>;
 
 pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>) -> usize {
     let rule = token.as_rule();
     match rule {
         Rule::expr_plus | Rule::expr_mul | Rule::expr_exp => extract_expr(ast, token),
+        Rule::fun => {
+            let value = String::from(token.as_str());
+            let child = token.into_inner().next().unwrap();
+            let inputs = extract_fun_arguments(ast, child);
+            ast.push(Step::Function { value, inputs });
+        }
         Rule::int_lit => {
             let n_str = token.as_str();
-            //println!("{:?}", n_str);
-            ast.push(Step {
-                rule: Rule::int_lit,
-                value: BigInt::parse_bytes(n_str.as_bytes(), 10),
-                inputs: vec![],
-            });
+            let value = BigInt::parse_bytes(n_str.as_bytes(), 10).unwrap();
+            ast.push(Step::Number { value });
         }
         _ => {
             walk_ast(ast, token.into_inner().next().unwrap()); // next inner token
@@ -61,16 +73,24 @@ fn extract_expr(ast: &mut Ast, parent_token: Pair<Rule>) {
                 } else {
                     vec![left_hand, right_hand]
                 };
-                ast.push(Step {
-                    rule: operation,
-                    value: None,
-                    inputs: inputs,
+                ast.push(Step::Operation {
+                    value: operation,
+                    inputs,
                 });
                 (ast.len() - 1, operation)
             }
         },
     );
 }
+
+fn extract_fun_arguments(ast: &mut Ast, token: Pair<Rule>) -> Vec<usize> {
+    token
+        .into_inner()
+        .map(|token| walk_ast(ast, token))
+        .collect()
+}
+
+////fn alternate(ast: &mut Ast, token: Pair<Rule>, odd: fn(i32) -> i32, even: fn(i32) -> i32) {}
 
 pub fn generate(formula: &str) -> Ast {
     let tokens = parse(formula);
