@@ -3,11 +3,26 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 extern crate clap;
+
 use clap::{App, Arg, ArgMatches};
+use engine::Sequence;
 use num_bigint::BigInt;
+use std::fmt;
 
 pub mod ast;
 pub mod engine;
+
+// Custom Error type
+
+type Result<T> = std::result::Result<T, ParseError>;
+#[derive(Debug, Clone)]
+struct ParseError;
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid first item to double")
+    }
+}
 
 fn extract_commandline_args<'a>() -> ArgMatches<'a> {
     App::new("Arbitrary long integer calculator")
@@ -26,43 +41,46 @@ fn print_ast(ast: &ast::Ast) {
 fn parse_first_terms(stack: &str) -> engine::Sequence {
     let mut seq: engine::Sequence = Vec::new();
     for term in stack.split(",") {
-        //println!("{}", term);
         let number = BigInt::parse_bytes(term.as_bytes(), 10).unwrap();
-        seq.push(ast::Step::Number { value: number });
+        let value = ast::Value::Number { value: number };
+        seq.push(value);
     }
     seq
 }
 
-fn first_parse(input: &str) -> (ast::Ast, engine::Sequence) {
-    let limit = input.find(";").unwrap();
-    return (
-        ast::generate(&input[0..limit]),
-        parse_first_terms(&input[limit + 1..]),
-    );
+pub fn first_parse(input: &str) -> (ast::Ast, engine::Sequence) {
+    match input.find(";") {
+        Some(limit) => (
+            ast::generate(&input[0..limit]),
+            parse_first_terms(&input[limit + 1..]),
+        ),
+        None => (ast::generate(input), vec![]),
+    }
 }
 
-fn step_to_str(step: ast::Step) -> String {
-    match step {
-        ast::Step::Number { value } => value.to_string(),
-        ast::Step::Boolean { value } => {
-            if value {
-                String::from("true")
-            } else {
-                String::from("false")
+fn print_sequence(sequence: &Sequence) {
+    for term in sequence {
+        let str_representation = match term {
+            ast::Value::Number { value } => value.to_string(),
+            ast::Value::Boolean { value } => {
+                if *value {
+                    String::from("true")
+                } else {
+                    String::from("false")
+                }
             }
-        }
-        ast::Step::String { value } => value,
-        _ => String::from(""),
+            ast::Value::String { value } => value.clone(),
+            _ => String::from(""),
+        };
+        println!("{}", str_representation);
     }
 }
 
 pub fn run(input: &str) -> String {
-    let (mut ast, mut first_terms) = first_parse(input);
+    let (ast, mut first_terms) = first_parse(input);
     print_ast(&ast);
     let sequence = engine::execute(&ast, &mut first_terms);
-    for term in sequence {
-        println!("{}", step_to_str(term.clone()))
-    }
+    print_sequence(sequence);
     String::from("")
 }
 

@@ -1,6 +1,5 @@
 use num_bigint::BigInt;
 use pest::iterators::Pair;
-
 use pest::Parser;
 
 #[derive(Parser)]
@@ -14,22 +13,35 @@ pub fn parse(formula: &str) -> Pair<Rule> {
         .unwrap()
 }
 
+type Range = (usize, usize);
+
 #[derive(Clone, Debug)]
-pub enum Step {
+pub struct Step {
+    pub value: Value,
+    pub range: Range,
+}
+#[derive(Clone, Debug)]
+pub enum Value {
     //Values
     Number { value: BigInt },
     String { value: String },
     Boolean { value: bool },
     Var { name: String },
-    // Functions
     Function { name: String, inputs: Vec<usize> },
     Operation { value: Rule, inputs: Vec<usize> },
+}
+
+fn add_range(Step { range: a, .. }: &Step, Step { range: b, .. }: &Step) -> Range {
+    (usize::min(a.0, b.0), usize::max(a.1, b.1))
 }
 
 pub type Ast = Vec<Step>;
 
 pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>) -> usize {
     let rule = token.as_rule();
+    let span = token.as_span();
+    let range: Range = (span.start(), span.end());
+
     match rule {
         Rule::expr_plus
         | Rule::expr_mul
@@ -46,15 +58,25 @@ pub fn walk_ast(ast: &mut Ast, token: Pair<Rule>) -> usize {
             let second = pairs.next().unwrap();
 
             let inputs = extract_fun_arguments(ast, second);
-            ast.push(Step::Function { name, inputs });
+            ast.push(Step {
+                range,
+                value: Value::Function { name, inputs },
+            });
         }
+
         Rule::int_lit => {
             let value = BigInt::parse_bytes(token.as_str().as_bytes(), 10).unwrap();
-            ast.push(Step::Number { value });
+            ast.push(Step {
+                range,
+                value: Value::Number { value },
+            });
         }
         Rule::var => {
             let name = String::from(token.as_str());
-            ast.push(Step::Var { name });
+            ast.push(Step {
+                range,
+                value: Value::Var { name },
+            });
         }
         _ => {
             walk_ast(ast, token.into_inner().next().unwrap()); // next inner token
@@ -82,9 +104,13 @@ fn extract_expr(ast: &mut Ast, parent_token: Pair<Rule>) {
                 } else {
                     vec![left_hand, right_hand]
                 };
-                ast.push(Step::Operation {
-                    value: operation,
-                    inputs,
+
+                ast.push(Step {
+                    range: add_range(&ast[left_hand], &ast[right_hand]),
+                    value: Value::Operation {
+                        value: operation,
+                        inputs,
+                    },
                 });
                 (ast.len() - 1, operation)
             }

@@ -1,9 +1,9 @@
-use crate::ast::{self, Ast, Rule, Step};
+use crate::ast::{self, Ast, Rule, Step, Value};
 use num_bigint::{BigInt, ToBigInt};
 
-type Values = Vec<ast::Step>;
+type Values = Vec<Value>;
 
-pub type Sequence = Vec<Step>;
+pub type Sequence = Vec<Value>;
 
 pub fn execute<'a>(ast: &Ast, sequence: &'a mut Sequence) -> &'a mut Sequence {
     let first_n = sequence.len();
@@ -12,13 +12,14 @@ pub fn execute<'a>(ast: &Ast, sequence: &'a mut Sequence) -> &'a mut Sequence {
     for n in first_n..50 {
         let mut values: Values = Vec::new();
         for step in ast {
-            match step {
-                Step::Operation { value, inputs } => extract_operation(&mut values, value, inputs),
-                Step::Function { name, inputs } => {
+            let Step { range: _, value } = step;
+            match value {
+                Value::Operation { value, inputs } => extract_operation(&mut values, value, inputs),
+                Value::Function { name, inputs } => {
                     extract_function(&mut values, name, &inputs, &sequence)
                 }
-                Step::Var { name } => extract_var(&mut values, name, n as i32),
-                x => values.push(x.clone()),
+                Value::Var { name } => extract_var(&mut values, name, n as i32),
+                _ => values.push(value.clone()),
             };
         }
         let term = values.pop().unwrap();
@@ -30,7 +31,7 @@ pub fn execute<'a>(ast: &Ast, sequence: &'a mut Sequence) -> &'a mut Sequence {
 fn extract_var(values: &mut Values, name: &String, n: i32) {
     match name.as_str() {
         "n" => {
-            values.push(Step::Number {
+            values.push(Value::Number {
                 value: n.to_bigint().unwrap(),
             });
         }
@@ -45,7 +46,7 @@ fn extract_function(values: &mut Values, name: &String, inputs: &Vec<usize>, seq
                 return;
             }
             match values[inputs[0]] {
-                Step::Boolean { value } => {
+                Value::Boolean { value } => {
                     if value {
                         values.push(values[inputs[1]].clone());
                     } else {
@@ -61,7 +62,7 @@ fn extract_function(values: &mut Values, name: &String, inputs: &Vec<usize>, seq
             }
             let argument = &values[inputs[0]];
             match argument {
-                Step::Number { value } => {
+                Value::Number { value } => {
                     let (_, list) = value.to_u32_digits();
                     let index = if list.len() == 0 { 0 } else { list[0] };
                     let term = sequence[index as usize].clone();
@@ -101,7 +102,7 @@ fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<us
             Rule::op_lt => Some(a < b),
             _ => None,
         } {
-            return values.push(Step::Boolean { value });
+            return values.push(Value::Boolean { value });
         }
 
         if let Some(value) = match operation {
@@ -113,7 +114,7 @@ fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<us
             Rule::op_exp => op_exp(a, b),
             _ => None,
         } {
-            return values.push(Step::Number { value });
+            return values.push(Value::Number { value });
         }
     }
     if let Some((a, b)) = as_boolean(a, b) {
@@ -122,25 +123,29 @@ fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<us
             Rule::op_and => Some(*a || *b),
             _ => None,
         } {
-            return values.push(Step::Boolean { value });
+            return values.push(Value::Boolean { value });
         };
     }
 }
 
-fn as_numbers<'a>(a: &'a Step, b: &'a Step) -> Option<(&'a BigInt, &'a BigInt)> {
+fn as_numbers<'a>(a: &'a Value, b: &'a Value) -> Option<(&'a BigInt, &'a BigInt)> {
     match a {
-        Step::Number { value: a_number } => match b {
-            Step::Number { value: b_number } => Some((a_number, b_number)),
+        Value::Number {
+            value: a_number, ..
+        } => match b {
+            Value::Number {
+                value: b_number, ..
+            } => Some((a_number, b_number)),
             _ => None,
         },
         _ => None,
     }
 }
 
-fn as_boolean<'a>(a: &'a Step, b: &'a Step) -> Option<(&'a bool, &'a bool)> {
+fn as_boolean<'a>(a: &'a Value, b: &'a Value) -> Option<(&'a bool, &'a bool)> {
     match a {
-        Step::Boolean { value: a_number } => match b {
-            Step::Boolean { value: b_number } => Some((a_number, b_number)),
+        Value::Boolean { value: a_number } => match b {
+            Value::Boolean { value: b_number } => Some((a_number, b_number)),
             _ => None,
         },
         _ => None,
