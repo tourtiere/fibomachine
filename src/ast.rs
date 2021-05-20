@@ -13,7 +13,7 @@ pub fn parse(formula: &str) -> Pair<Rule> {
         .unwrap()
 }
 
-type Range = (usize, usize);
+pub type Range = (usize, usize);
 
 #[derive(Clone, Debug)]
 pub struct Step {

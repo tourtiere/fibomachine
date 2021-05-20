@@ -11,16 +11,21 @@ use std::fmt;
 
 pub mod ast;
 pub mod engine;
+pub mod error;
 
 // Custom Error type
+pub type Result<T> = std::result::Result<T, ParseError>;
 
-type Result<T> = std::result::Result<T, ParseError>;
 #[derive(Debug, Clone)]
-struct ParseError;
+
+pub struct ParseError {
+    range: Option<ast::Range>,
+}
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid first item to double")
+        //let t = format!("Error {}", &self.range.0);
+        write!(f, "Error")
     }
 }
 
@@ -31,7 +36,6 @@ fn extract_commandline_args<'a>() -> ArgMatches<'a> {
         .get_matches()
 }
 
-#[allow(dead_code)]
 fn print_ast(ast: &ast::Ast) {
     for (idx, step) in ast.iter().enumerate() {
         println!("{} - {:?}", idx, step);
