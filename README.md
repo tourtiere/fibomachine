@@ -1,3 +1,8 @@
+Todo:
+- Add arguments to exposed function.
+
+---
+
 # fibomachine
 Arbitrary long integer calculator
 
