@@ -1,9 +1,11 @@
 Todo:
 - Add arguments to exposed function.
+- Add error handling for out of bounds index
+- Autocheck sequence or calculator mode
 
 ---
 
-# fibomachine
+# Fibomachine
 Arbitrary long integer calculator
 
 ## Usage
