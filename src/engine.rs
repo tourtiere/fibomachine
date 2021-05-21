@@ -1,79 +1,91 @@
 use crate::ast::{self, Ast, Rule, Step, Value};
 use num_bigint::{BigInt, ToBigInt};
 
+use crate::error::{Error, ErrorKind};
+
 type Values = Vec<Value>;
 
 pub type Sequence = Vec<Value>;
 
-pub fn execute<'a>(ast: &Ast, sequence: &'a mut Sequence) -> &'a mut Sequence {
+pub fn execute<'a>(ast: &Ast, sequence: &'a mut Sequence) -> Result<&'a mut Sequence, Error> {
     let first_n = sequence.len();
-    println!("{:?}", sequence);
-
+    //println!("{:?}", sequence);
     for n in first_n..50 {
         let mut values: Values = Vec::new();
         for step in ast {
-            let Step { range: _, value } = step;
-            match value {
-                Value::Operation { value, inputs } => extract_operation(&mut values, value, inputs),
+            let Step { value, .. } = step;
+            let maybe_value: Result<Value, ErrorKind> = match value {
+                Value::Operation { value, inputs } => extract_operation(&values, value, inputs),
                 Value::Function { name, inputs } => {
-                    extract_function(&mut values, name, &inputs, &sequence)
+                    extract_function(&values, name, &inputs, &sequence)
                 }
-                Value::Var { name } => extract_var(&mut values, name, n as i32),
-                _ => values.push(value.clone()),
+                Value::Var { name } => extract_var(name, n as i32),
+                _ => Ok(value.clone()),
             };
+
+            match maybe_value {
+                Ok(value) => values.push(value),
+                Err(kind) => {
+                    return Err(Error {
+                        kind,
+                        step: step.clone(),
+                    })
+                }
+            }
         }
         let term = values.pop().unwrap();
         sequence.push(term);
     }
-    sequence
+    Ok(sequence)
 }
 
-fn extract_var(values: &mut Values, name: &String, n: i32) {
+fn extract_var(name: &String, n: i32) -> Result<Value, ErrorKind> {
     match name.as_str() {
-        "n" => {
-            values.push(Value::Number {
-                value: n.to_bigint().unwrap(),
-            });
-        }
-        _ => (),
+        "n" => Ok(Value::Number {
+            value: n.to_bigint().unwrap(),
+        }),
+        _ => Err(ErrorKind::Undefined),
     }
 }
 
-fn extract_function(values: &mut Values, name: &String, inputs: &Vec<usize>, sequence: &Sequence) {
+fn extract_function(
+    values: &Values,
+    name: &String,
+    inputs: &Vec<usize>,
+    sequence: &Sequence,
+) -> Result<Value, ErrorKind> {
     match name.as_str() {
         "if" => {
             if inputs.len() != 3 {
-                return;
+                return Err(ErrorKind::Count);
             }
             match values[inputs[0]] {
                 Value::Boolean { value } => {
                     if value {
-                        values.push(values[inputs[1]].clone());
+                        Ok(values[inputs[1]].clone())
                     } else {
-                        values.push(values[inputs[2]].clone());
+                        Ok(values[inputs[2]].clone())
                     }
                 }
-                _ => (),
-            };
+                _ => Err(ErrorKind::Type),
+            }
         }
         "a" => {
             if inputs.len() != 1 {
-                return;
+                return Err(ErrorKind::Count);
             }
             let argument = &values[inputs[0]];
             match argument {
                 Value::Number { value } => {
                     let (_, list) = value.to_u32_digits();
                     let index = if list.len() == 0 { 0 } else { list[0] };
-                    let term = sequence[index as usize].clone();
-                    //println!("term: {:?}", term);
-                    values.push(term);
+                    Ok(sequence[index as usize].clone())
                 }
-                _ => (),
-            };
+                _ => Err(ErrorKind::Type),
+            }
         }
-        _ => (),
-    };
+        _ => Err(ErrorKind::Undefined),
+    }
 }
 
 fn op_exp(a: &BigInt, b: &BigInt) -> Option<BigInt> {
@@ -88,7 +100,11 @@ fn op_exp(a: &BigInt, b: &BigInt) -> Option<BigInt> {
     Some(a.pow(digits[0]))
 }
 
-fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<usize>) {
+fn extract_operation(
+    values: &Values,
+    operation: &ast::Rule,
+    inputs: &Vec<usize>,
+) -> Result<Value, ErrorKind> {
     let a = &values[inputs[0]];
     let b = &values[inputs[1]];
 
@@ -102,7 +118,7 @@ fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<us
             Rule::op_lt => Some(a < b),
             _ => None,
         } {
-            return values.push(Value::Boolean { value });
+            return Ok(Value::Boolean { value });
         }
 
         if let Some(value) = match operation {
@@ -114,7 +130,7 @@ fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<us
             Rule::op_exp => op_exp(a, b),
             _ => None,
         } {
-            return values.push(Value::Number { value });
+            return Ok(Value::Number { value });
         }
     }
     if let Some((a, b)) = as_boolean(a, b) {
@@ -123,9 +139,10 @@ fn extract_operation(values: &mut Values, operation: &ast::Rule, inputs: &Vec<us
             Rule::op_and => Some(*a || *b),
             _ => None,
         } {
-            return values.push(Value::Boolean { value });
+            return Ok(Value::Boolean { value });
         };
     }
+    return Err(ErrorKind::Type);
 }
 
 fn as_numbers<'a>(a: &'a Value, b: &'a Value) -> Option<(&'a BigInt, &'a BigInt)> {

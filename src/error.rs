@@ -1,36 +1,28 @@
 // error1.rs
-use crate::ast::Range;
-use std::error::Error;
+use crate::ast::Step;
 use std::fmt;
 
 #[derive(Debug)]
-struct ParseError {
-    range: Range,
+pub enum ErrorKind {
+    Count,
+    Undefined,
+    Type,
+}
+#[derive(Debug)]
+pub struct Error {
+    pub step: Step,
+    pub kind: ErrorKind,
 }
 
-impl ParseError {
-    fn new(range: &Range) -> ParseError {
-        ParseError {
-            range: range.clone(),
-        }
-    }
-}
+//pub type Result<T> = std::result::Result<T, Error>;
 
-impl fmt::Display for ParseError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.range)
+        let error_type = match self.kind {
+            ErrorKind::Count => "count",
+            ErrorKind::Undefined => "Undefined",
+            ErrorKind::Type => "Type",
+        };
+        write!(f, "Error {}. range: {:?}", error_type, self.step.range)
     }
 }
-
-// a test function that returns our error result
-/*
-fn raises_parse_error(yes: bool) -> Result<(), ParseError> {
-    let a = (0_usize, 0_usize);
-    if yes {
-        Err(ParseError::new(&a))
-    } else {
-        Ok(())
-    }
-}
-
- */

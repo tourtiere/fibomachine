@@ -1,48 +1,21 @@
 extern crate num_bigint;
+
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 extern crate clap;
+extern crate wasm_bindgen;
 
-use clap::{App, Arg, ArgMatches};
+//use clap::{App, Arg, ArgMatches};
 use engine::Sequence;
 use num_bigint::BigInt;
-use std::fmt;
+use wasm_bindgen::prelude::*;
 
 pub mod ast;
 pub mod engine;
 pub mod error;
 
-// Custom Error type
-pub type Result<T> = std::result::Result<T, ParseError>;
-
-#[derive(Debug, Clone)]
-
-pub struct ParseError {
-    range: Option<ast::Range>,
-}
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        //let t = format!("Error {}", &self.range.0);
-        write!(f, "Error")
-    }
-}
-
-fn extract_commandline_args<'a>() -> ArgMatches<'a> {
-    App::new("Arbitrary long integer calculator")
-        .author("Tourtiere")
-        .arg(Arg::with_name("EXPRESSION").required(true))
-        .get_matches()
-}
-
-fn print_ast(ast: &ast::Ast) {
-    for (idx, step) in ast.iter().enumerate() {
-        println!("{} - {:?}", idx, step);
-    }
-}
-
-fn parse_first_terms(stack: &str) -> engine::Sequence {
+pub fn parse_first_terms(stack: &str) -> engine::Sequence {
     let mut seq: engine::Sequence = Vec::new();
     for term in stack.split(",") {
         let number = BigInt::parse_bytes(term.as_bytes(), 10).unwrap();
@@ -62,9 +35,10 @@ pub fn first_parse(input: &str) -> (ast::Ast, engine::Sequence) {
     }
 }
 
-fn print_sequence(sequence: &Sequence) {
-    for term in sequence {
-        let str_representation = match term {
+fn printable_sequence(sequence: &Sequence) -> String {
+    sequence
+        .iter()
+        .map(|term| match term {
             ast::Value::Number { value } => value.to_string(),
             ast::Value::Boolean { value } => {
                 if *value {
@@ -75,23 +49,24 @@ fn print_sequence(sequence: &Sequence) {
             }
             ast::Value::String { value } => value.clone(),
             _ => String::from(""),
-        };
-        println!("{}", str_representation);
-    }
+        })
+        .collect::<Vec<String>>()
+        .join(",")
 }
 
+#[wasm_bindgen]
 pub fn run(input: &str) -> String {
     let (ast, mut first_terms) = first_parse(input);
-    print_ast(&ast);
+    /*
+    for (idx, step) in ast.iter().enumerate() {
+        println!("{} - {:?}", idx, step);
+    }
+    */
     let sequence = engine::execute(&ast, &mut first_terms);
-    print_sequence(sequence);
-    String::from("")
-}
-
-fn main() {
-    let matches = extract_commandline_args();
-    let formula = matches.value_of("EXPRESSION").unwrap();
-    println!("{}", run(formula));
+    match sequence {
+        Ok(sequence) => printable_sequence(sequence),
+        Err(err) => format!("{}", err),
+    }
 }
 
 #[test]
