@@ -20,11 +20,17 @@ pub struct Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let error_type = match self.kind {
-            ErrorKind::Count => "count",
+            ErrorKind::Count => "Count",
             ErrorKind::Undefined => "Undefined",
             ErrorKind::Type => "Type",
             ErrorKind::OutOfBounds => "OutOfBounds",
         };
-        write!(f, "Error {}. range: {:?}", error_type, self.step.range)
+        write!(
+            f,
+            r#"{{ "success":false, "errorType":"{}", "range":[{},{}] }}"#,
+            error_type,
+            self.step.range.0.to_string(),
+            self.step.range.1.to_string()
+        )
     }
 }
