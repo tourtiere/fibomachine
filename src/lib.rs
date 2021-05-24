@@ -18,9 +18,10 @@ pub mod error;
 pub fn parse_first_terms(stack: &str) -> engine::Sequence {
     let mut seq: engine::Sequence = Vec::new();
     for term in stack.split(",") {
-        let number = BigInt::parse_bytes(term.as_bytes(), 10).unwrap();
-        let value = ast::Value::Number { value: number };
-        seq.push(value);
+        if let Some(number) = BigInt::parse_bytes(term.as_bytes(), 10) {
+            let value = ast::Value::Number { value: number };
+            seq.push(value);
+        }
     }
     seq
 }
@@ -63,6 +64,9 @@ pub fn run(input: &str, limit: i32) -> String {
     }
     */
     let sequence = engine::execute(&ast, &mut first_terms, limit as usize);
+    /*
+
+    */
     match sequence {
         Ok(sequence) => printable_sequence(sequence),
         Err(err) => format!("{}", err),
@@ -81,5 +85,5 @@ fn check_fibonacci_sequence() {
 
 #[test]
 fn check_out_of_bounds_error() {
-    assert_eq!(run("a(n-1)+a(n-2);", 3), "error");
+    assert_eq!(run("a(n-1)+a(n-2);0", 3), "error");
 }

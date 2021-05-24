@@ -1,20 +1,19 @@
 Todo:
-- Add arguments to exposed function.
-- Add error handling for out of bounds index
-- Autocheck sequence or calculator mode, by inspecting
---  Edit: no necessary
 
----
+Rust Errors to wasm. Json?
 
 # Fibomachine
+
 Arbitrary long integer calculator
 
 ## Usage
+
 ```
 fibomachine <Expression>
 ```
 
 ## Example
+
 ```
 $ fibomachine "3^500/2^500"
 
