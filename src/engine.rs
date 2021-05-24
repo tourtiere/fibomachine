@@ -83,7 +83,11 @@ fn extract_function(
                 Value::Number { value } => {
                     let (_, list) = value.to_u32_digits();
                     let index = if list.len() == 0 { 0 } else { list[0] };
-                    Ok(sequence[index as usize].clone())
+                    if index < sequence.len() as u32 {
+                        Ok(sequence[index as usize].clone())
+                    } else {
+                        Err(ErrorKind::OutOfBounds)
+                    }
                 }
                 _ => Err(ErrorKind::Type),
             }

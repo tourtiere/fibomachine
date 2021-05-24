@@ -78,3 +78,8 @@ fn check_formula() {
 fn check_fibonacci_sequence() {
     assert_eq!(run("a(n-1)+a(n-2);0,1", 10), "0,1,1,2,3,5,8,13,21,34");
 }
+
+#[test]
+fn check_out_of_bounds_error() {
+    assert_eq!(run("a(n-1)+a(n-2);", 3), "error");
+}

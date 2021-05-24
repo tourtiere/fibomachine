@@ -7,6 +7,7 @@ pub enum ErrorKind {
     Count,
     Undefined,
     Type,
+    OutOfBounds,
 }
 #[derive(Debug)]
 pub struct Error {
@@ -22,6 +23,7 @@ impl fmt::Display for Error {
             ErrorKind::Count => "count",
             ErrorKind::Undefined => "Undefined",
             ErrorKind::Type => "Type",
+            ErrorKind::OutOfBounds => "OutOfBounds",
         };
         write!(f, "Error {}. range: {:?}", error_type, self.step.range)
     }
