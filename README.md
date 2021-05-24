@@ -1,7 +1,8 @@
 Todo:
 - Add arguments to exposed function.
 - Add error handling for out of bounds index
-- Autocheck sequence or calculator mode
+- Autocheck sequence or calculator mode, by inspecting
+--  Edit: no necessary
 
 ---
 

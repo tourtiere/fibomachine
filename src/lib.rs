@@ -55,14 +55,14 @@ fn printable_sequence(sequence: &Sequence) -> String {
 }
 
 #[wasm_bindgen]
-pub fn run(input: &str) -> String {
+pub fn run(input: &str, limit: i32) -> String {
     let (ast, mut first_terms) = first_parse(input);
     /*
     for (idx, step) in ast.iter().enumerate() {
         println!("{} - {:?}", idx, step);
     }
     */
-    let sequence = engine::execute(&ast, &mut first_terms);
+    let sequence = engine::execute(&ast, &mut first_terms, limit as usize);
     match sequence {
         Ok(sequence) => printable_sequence(sequence),
         Err(err) => format!("{}", err),
@@ -71,13 +71,10 @@ pub fn run(input: &str) -> String {
 
 #[test]
 fn check_formula() {
-    assert_eq!(run("17/3 + 5*3 - 11"), "9");
+    assert_eq!(run("17/3 + 5*3 - 11", 1), "9");
 }
+
 #[test]
-fn check_big_int() {
-    let num = "70012410520695638594948118043706280297620717421509";
-    let den = "1007242982";
-    let result = "69508958386265170914785403829903557766978";
-    let formula = &format!("{}/{}", num, den);
-    assert_eq!(run(formula), result);
+fn check_fibonacci_sequence() {
+    assert_eq!(run("a(n-1)+a(n-2);0,1", 10), "0,1,1,2,3,5,8,13,21,34");
 }

@@ -7,10 +7,14 @@ type Values = Vec<Value>;
 
 pub type Sequence = Vec<Value>;
 
-pub fn execute<'a>(ast: &Ast, sequence: &'a mut Sequence) -> Result<&'a mut Sequence, Error> {
+pub fn execute<'a>(
+    ast: &Ast,
+    sequence: &'a mut Sequence,
+    limit: usize,
+) -> Result<&'a mut Sequence, Error> {
     let first_n = sequence.len();
-    //println!("{:?}", sequence);
-    for n in first_n..150 {
+
+    for n in first_n..limit {
         let mut values: Values = Vec::new();
         for step in ast {
             let Step { value, .. } = step;
