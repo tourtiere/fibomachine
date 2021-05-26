@@ -1,15 +1,22 @@
-
 {
-
-  "extends": "@tsconfig/svelte/tsconfig.json",
-
-  "include": ["src/**/*"],
-  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
-  "compilerOptions": {
-    "module": "ESNext",
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true
-  }
+	"compilerOptions": {
+		"outDir": "./dist",
+		"target": "ES2017",
+		"moduleResolution": "node",
+		"module": "ESNext",
+		"noImplicitAny": false,
+		"removeComments": true,
+		"sourceMap": true,
+		"jsx": "react",
+		"jsxFactory": "h"
+	},
+	"suppressImplicitAnyIndexErrors": true,
+	"lib": [
+		"dom",
+		"es2017"
+	],
+	"baseUrl": ".",
+	"exclude": [
+		"dist"
+	]
 }

@@ -1,0 +1,80 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/Cellar/yarn/1.22.10/libexec/bin/yarn.js add webpack -D
+
+PATH: 
+  /Users/etienne/.cargo/bin:/Users/etienne/opt/miniconda3/condabin:/Users/etienne/.gem/ruby/X.X.0/bin:/usr/local/opt/ruby/bin:/Users/etienne/Library/Android/sdk/emulator:/Users/etienne/Library/Android/sdk/tools:/Users/etienne/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Library/Apple/usr/bin:/Applications/Genymotion.app/Contents/MacOS/tools:/Users/etienne/dev/flutter/bin:/Users/etienne/opt/miniconda3/bin:/Applications/OpenSCAD.app/Contents/MacOS
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  14.15.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Invariant Violation: could not find a copy of eslint to link in /Users/etienne/codes/github.com/fibo-machine/www/node_modules/eslint-config-standard-preact/node_modules
+      at invariant (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:2314:15)
+      at PackageLinker.<anonymous> (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:48717:7)
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:321:13
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+
+npm manifest: 
+  {
+  	"name": "preact-typescript-webpack4-boilerplate",
+  	"version": "2.0.0",
+  	"description": "Preact training app",
+  	"scripts": {
+  		"build": "npm run clean && webpack --config ./webpack.config.js --mode production --progress",
+  		"postbuild": "react-snap",
+  		"dev": "npm run clean && webpack --config ./webpack.config.js --mode development",
+  		"dev:watch": "npm run clean && webpack --config ./webpack.config.js --mode development --watch",
+  		"start": "webpack serve --config ./webpack.config.js --mode development --host 0.0.0.0",
+  		"clean": "rimraf ./dist"
+  	},
+  	"alias": {
+  		"preact": "./node_modules/preact/dist/preact.min.js"
+  	},
+  	"license": "ISC",
+  	"dependencies": {
+  		"preact": "^10.5.13",
+  		"fibomachine": "file:../pkg"
+  
+  	},
+  	"devDependencies": {
+  		"copy-webpack-plugin": "^8.0.0",
+  		"css-loader": "^5.1.2",
+  		"eslint": "^7.21.0",
+  		"eslint-config-standard-preact": "^1.1.6",
+  		"eslint-loader": "^4.0.2",
+  		"eslint-plugin-optimize-regex": "^1.2.0",
+  		"eslint-plugin-preact": "^0.1.0",
+  		"eslint-plugin-promise": "^4.3.1",
+  		"eslint-plugin-sonarjs": "^0.6.0",
+  		"file-loader": "^6.2.0",
+  		"less": "^4.1.1",
+  		"less-loader": "^8.0.0",
+  		"less-plugin-clean-css": "^1.5.1",
+  		"optimize-css-assets-webpack-plugin": "^5.0.4",
+  		"react-snap": "^1.23.0",
+  		"rimraf": "^3.0.2",
+  		"ts-loader": "^8.0.18",
+  		"typescript": "^4.2.3"
+  	},
+  	"reactSnap": {
+  		"source": "dist",
+  		"puppeteerArgs": [
+  			"--no-sandbox",
+  			"--disable-setuid-sandbox"
+  		]
+  	}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

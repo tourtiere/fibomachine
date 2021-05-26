@@ -1,45 +1,50 @@
 {
-  "name": "fibo-front",
-  "version": "0.1.0",
-  "description": "create an app to consume rust-generated wasm packages",
-  "main": "index.js",
-  "bin": {
-    "create-wasm-app": ".bin/create-wasm-app.js"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear",
-    "validate": "svelte-check"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "@rollup/plugin-typescript": "^8.0.0",
-    "@tsconfig/svelte": "^1.0.0",
-    "@wasm-tool/rollup-plugin-rust": "^1.0.6",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "rollup-plugin-typescript": "^1.0.1",
-    "sirv": "^1.0.12",
-    "svelte": "^3.38.2",
-    "svelte-check": "^1.0.0",
-    "svelte-loader": "^3.1.1",
-    "svelte-preprocess": "^4.0.0",
-    "tslib": "^2.0.0",
-    "typescript": "^4.0.0"
-  },
-  "dependencies": {
-    "@codemirror/basic-setup": "^0.18.2",
-    "@codemirror/commands": "^0.18.2",
-    "@codemirror/highlight": "^0.18.4",
-    "@codemirror/language": "^0.18.1",
-    "@codemirror/lint": "^0.18.3",
-    "codejar": "^3.4.0",
-    "lezer": "^0.13.5",
-    "sirv-cli": "^1.0.12"
-  }
+	"name": "preact-typescript-webpack4-boilerplate",
+	"version": "2.0.0",
+	"description": "Preact training app",
+	"scripts": {
+		"build": "npm run clean && webpack --config ./webpack.config.js --mode production --progress",
+		"postbuild": "react-snap",
+		"dev": "npm run clean && webpack --config ./webpack.config.js --mode development",
+		"dev:watch": "npm run clean && webpack --config ./webpack.config.js --mode development --watch",
+		"start": "webpack serve --config ./webpack.config.js --mode development --host 0.0.0.0",
+		"clean": "rimraf ./dist"
+	},
+	"alias": {
+		"preact": "./node_modules/preact/dist/preact.min.js"
+	},
+	"license": "ISC",
+	"dependencies": {
+		"fibomachine": "file:../pkg",
+		"preact": "^10.5.13",
+		"@codemirror/basic-setup": "^0.18.2",
+		"@codemirror/commands": "^0.18.2",
+		"@codemirror/highlight": "^0.18.4",
+		"@codemirror/language": "^0.18.1",
+		"@codemirror/lint": "^0.18.3"
+	},
+	"devDependencies": {
+		"lezer": "^0.13.5",
+		"copy-webpack-plugin": "^8.0.0",
+		"css-loader": "^5.1.2",
+		"file-loader": "^6.2.0",
+		"less": "^4.1.1",
+		"less-loader": "^8.0.0",
+		"less-plugin-clean-css": "^1.5.1",
+		"react-snap": "^1.23.0",
+		"rimraf": "^3.0.2",
+		"ts-loader": "^8.0.18",
+		"typescript": "^4.2.3",
+		"webpack": "^5.37.1",
+		"webpack-cli": "^4.7.0",
+		"webpack-dev-server": "^3.11.2"
+
+	},
+	"reactSnap": {
+		"source": "dist",
+		"puppeteerArgs": [
+			"--no-sandbox",
+			"--disable-setuid-sandbox"
+		]
+	}
 }
