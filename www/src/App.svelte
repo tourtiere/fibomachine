@@ -1,5 +1,5 @@
 <script>
-    import Editor from "./Editor.svelte";
+    import Editor from "./Editor/Editor.svelte";
     export let name;
 </script>
 
@@ -35,8 +35,12 @@
         }
     }
     .editor-wrapper {
-        height: 50px;
-        width: 300px;
-        background-color: rgb(200, 200, 200);
+        height: 31;
+        padding: 0px 7px;
+        font-size: 17px;
+        font-family: Arial, monospace;
+        border: 1px solid#888888;
+        box-shadow: 2px 2px 4px #888888;
+        border-radius: 5px;
     }
 </style>

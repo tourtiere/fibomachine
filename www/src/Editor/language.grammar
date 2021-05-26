@@ -1,0 +1,20 @@
+@top Program { expression }
+
+expression {
+  Int | 
+  Identifier |
+  String |
+  RightSide |
+}
+
+@tokens {
+  Int {  $[0-9]+ }    
+  Identifier { $[a-zA-Z]+ $[a-zA-Z_0-9]* }
+  String { '"' (!["\\] | "\\" _)* '"' }
+  RightSide { ";" $[0-1]  }
+  space { $[ \t\n\r]+ }
+  "(" ")"
+}
+
+@skip { space  }
+@detectDelim

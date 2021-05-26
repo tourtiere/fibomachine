@@ -60,3 +60,4 @@ parenthesis = _{"(" ~ expr ~ ")"}
 
 formula = { SOI ~ expr ~ EOI }
 WHITESPACE = _{ " " | NEWLINE | "\t"}
+

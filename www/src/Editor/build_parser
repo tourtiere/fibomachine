@@ -1,0 +1,2 @@
+#!/bin/bash
+lezer-generator language.grammar -o parser.js && mv parser.js parser.ts
