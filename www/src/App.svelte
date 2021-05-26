@@ -37,6 +37,6 @@
     .editor-wrapper {
         height: 50px;
         width: 300px;
-        background-color: green;
+        background-color: rgb(200, 200, 200);
     }
 </style>

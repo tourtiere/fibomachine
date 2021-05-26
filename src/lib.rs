@@ -36,8 +36,8 @@ pub fn first_parse(input: &str) -> (ast::Ast, engine::Sequence) {
     }
 }
 
-fn printable_sequence(sequence: &Sequence) -> String {
-    sequence
+fn json_print(sequence: &Sequence) -> String {
+    let values = sequence
         .iter()
         .map(|term| match term {
             ast::Value::Number { value } => value.to_string(),
@@ -51,24 +51,19 @@ fn printable_sequence(sequence: &Sequence) -> String {
             ast::Value::String { value } => value.clone(),
             _ => String::from(""),
         })
+        .map(|term| format!("\"{}\"", term))
         .collect::<Vec<String>>()
-        .join(",")
+        .join(",");
+
+    format!(r#"{{"success":true,"values":[{}]}}"#, values)
 }
 
 #[wasm_bindgen]
 pub fn run(input: &str, limit: i32) -> String {
     let (ast, mut first_terms) = first_parse(input);
-    /*
-    for (idx, step) in ast.iter().enumerate() {
-        println!("{} - {:?}", idx, step);
-    }
-    */
     let sequence = engine::execute(&ast, &mut first_terms, limit as usize);
-    /*
-
-    */
     match sequence {
-        Ok(sequence) => printable_sequence(sequence),
+        Ok(sequence) => json_print(sequence),
         Err(err) => format!("{}", err),
     }
 }

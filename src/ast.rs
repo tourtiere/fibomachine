@@ -22,7 +22,6 @@ pub struct Step {
 }
 #[derive(Clone, Debug)]
 pub enum Value {
-    //Values
     Number { value: BigInt },
     String { value: String },
     Boolean { value: bool },

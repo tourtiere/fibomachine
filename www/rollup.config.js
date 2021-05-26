@@ -1,13 +1,12 @@
+import rust from "@wasm-tool/rollup-plugin-rust";
+import resolve from "@rollup/plugin-node-resolve";
 import svelte from "rollup-plugin-svelte";
 import commonjs from "@rollup/plugin-commonjs";
-import resolve from "@rollup/plugin-node-resolve";
 import livereload from "rollup-plugin-livereload";
 import { terser } from "rollup-plugin-terser";
-import sveltePreprocess from "svelte-preprocess";
-import rust from "@wasm-tool/rollup-plugin-rust";
 import typescript from "rollup-plugin-typescript";
-
 import css from "rollup-plugin-css-only";
+import sveltePreprocess from "svelte-preprocess";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -21,11 +20,10 @@ function serve() {
     return {
         writeBundle() {
             if (server) return;
-            server = require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
+            server = require("child_process").spawn("yarn", ["run", "start", "--", "--dev"], {
                 stdio: ["ignore", "inherit", "inherit"],
                 shell: true,
             });
-
             process.on("SIGTERM", toExit);
             process.on("exit", toExit);
         },
