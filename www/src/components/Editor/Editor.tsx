@@ -1,12 +1,10 @@
 import { EditorState, EditorView } from "@codemirror/basic-setup";
 import { LanguageSupport } from "@codemirror/language";
-import { language, highlight } from "./language";
-import { customLinter } from "./customLinter";
-import { keymap } from "@codemirror/view";
-import { placeholder } from "@codemirror/view";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { keymap, placeholder, ViewUpdate } from "@codemirror/view";
 import { h, JSX } from "preact";
-import { ViewUpdate } from "@codemirror/view";
+import { useEffect, useRef } from "preact/hooks";
+import { customLinter } from "./customLinter";
+import { highlight, language } from "./language";
 
 function extractUrl() {
     const url = new URL(window.location.href);
@@ -25,18 +23,18 @@ function saveUrl(value: string) {
 interface Props {
     onChange: (value: string) => void;
 }
+
 //[your expresssion] ; [first term] , [second term] ...
 export function Editor({ onChange }: Props): JSX.Element {
-    const codemirrorRef = useRef(null);
+    const codemirrorRef = useRef<HTMLDivElement>(null);
     const initValue = extractUrl();
-
     useEffect(() => {
         document.title = `You clicked imes`;
         let editor = new EditorView({
             state: EditorState.create({
                 doc: initValue,
                 extensions: [
-                    keymap.of([{ key: "Enter", run: () => null, preventDefault: true }]),
+                    keymap.of([{ key: "Enter", run: () => false, preventDefault: true }]),
                     highlight,
                     new LanguageSupport(language),
                     customLinter,
@@ -45,7 +43,6 @@ export function Editor({ onChange }: Props): JSX.Element {
                         if (!v.docChanged) return;
                         const text = v.state.doc.sliceString(0);
                         saveUrl(text);
-
                         onChange(text);
                     }),
                 ],

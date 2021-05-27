@@ -3,6 +3,9 @@ const path = require("path");
 
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+
+
 
 module.exports = (env, args) => {
     const isProduction = args && args["mode"] === "production";
@@ -34,6 +37,8 @@ module.exports = (env, args) => {
         },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".html", ".txt"],
+		    plugins: [new TsconfigPathsPlugin({/* options: see below */})]
+
         },
         module: {
             rules: [

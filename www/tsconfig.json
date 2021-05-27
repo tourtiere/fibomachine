@@ -4,11 +4,13 @@
 		"target": "ES2017",
 		"moduleResolution": "node",
 		"module": "ESNext",
-		"noImplicitAny": false,
+		"noImplicitAny": true,
 		"removeComments": true,
 		"sourceMap": true,
+		"strict": true,
 		"jsx": "react",
-		"jsxFactory": "h"
+		"jsxFactory": "h",
+		"baseUrl": "./src",
 	},
 	"suppressImplicitAnyIndexErrors": true,
 	"lib": [
