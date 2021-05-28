@@ -1,2 +1,3 @@
 #!/bin/bash
+cd ../ && ./wasm-build && cd www && 
 rm -rf node_modules && yarn install && yarn cache clean && yarn start

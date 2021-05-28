@@ -41,9 +41,9 @@ export default () => {
                     try {
                         const result = wasm.current?.run_wasm(value, 100);
                         setResult(JSON.parse(result));
-                    } catch {
+                    } catch (err) {
                         setResult({ success: false, errorType: "Other", range: undefined });
-                        console.log("error");
+                        console.log(err);
                     }
                 }}
             />

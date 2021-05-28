@@ -15,14 +15,14 @@ export default () => {
 
     return (
         <div class="output">
-            <div class="output-row" key={"headline"}>
-                <div class="output-index">Index</div>
-                <div class="output-value">Number</div>
+            <div class="row header" key={"headline"}>
+                <div class="index">n</div>
+                <div class="value">a(n)</div>
             </div>
             {result.values.map((value, idx) => (
-                <div class="output-row" key={idx + value}>
-                    <div class="output-index">{idx.toString()}</div>
-                    <div class="output-value">{value}</div>
+                <div class="row" key={idx + value}>
+                    <div class="index">{idx.toString()}</div>
+                    <div class="value">{value}</div>
                 </div>
             ))}
         </div>

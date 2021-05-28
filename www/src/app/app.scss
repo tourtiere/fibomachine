@@ -5,7 +5,7 @@ body {
     min-width: 400px;
     overflow-x: hidden;
     font-size: 15px;
-    color: #000;
+    color: #333;
     background-color: #fff;
     align-items: center;
     justify-content: center;
@@ -35,6 +35,7 @@ body {
 
     a {
         margin-right: 40px;
+        color: rgb(68, 123, 239);
     }
     .github {
         margin-right: 0px;

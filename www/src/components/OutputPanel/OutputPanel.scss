@@ -1,25 +1,28 @@
 .output {
     flex: 1;
     margin-top: 20px;
-
     overflow-y: scroll;
-}
-.output-row {
-    flex-direction: row;
-    display: flex;
-    flex: 1;
-    padding: 10px;
-    font-family: Arial, monospace;
-}
-.output-row:nth-child(even) {
-    background: rgb(244, 244, 244);
-}
-.output-row:nth-child(odd) {
-    background: #fff;
-}
-.output-index {
-    min-width: 100px;
-}
-.output-value {
-    flex-grow: 1;
+
+    .row {
+        flex-direction: row;
+        display: flex;
+        flex: 1;
+        padding: 10px;
+        font-family: monospace;
+    }
+    .row:nth-child(even) {
+        background: rgb(244, 244, 244);
+    }
+    .row:nth-child(odd) {
+        background: #fff;
+    }
+    .index {
+        min-width: 100px;
+    }
+    .value {
+        flex-grow: 1;
+    }
+    .header {
+        font-weight: bold;
+    }
 }

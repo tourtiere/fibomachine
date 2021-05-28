@@ -1,7 +1,8 @@
 use crate::ast::{self, Ast, Rule, Step, Value};
 use num_bigint::{BigInt, ToBigInt};
+/*
 use std::time::Instant;
-
+*/
 use crate::error::{Error, ErrorKind};
 
 type Values = Vec<Value>;
@@ -14,7 +15,7 @@ pub fn execute<'a>(
     limit: usize,
 ) -> Result<&'a mut Sequence, Error> {
     let first_n = sequence.len();
-    let timer = Instant::now();
+    //let timer = Instant::now();
 
     for n in first_n..limit {
         let mut values: Values = Vec::new();
@@ -44,9 +45,11 @@ pub fn execute<'a>(
         sequence.push(term);
 
         // Timeout
+        /*
         if timer.elapsed().as_millis() > 50 {
             return Ok(sequence);
         }
+        */
     }
     Ok(sequence)
 }

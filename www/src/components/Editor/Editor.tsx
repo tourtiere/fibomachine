@@ -39,7 +39,6 @@ export function Editor({ onChange, wasmLoaded }: Props): JSX.Element {
 
         const initValue = extractUrl();
         if (initValue !== "") onChange(initValue);
-        document.title = `You clicked imes`;
         let editor = new EditorView({
             state: EditorState.create({
                 doc: initValue,
