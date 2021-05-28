@@ -1,10 +1,7 @@
 Todo:
 
-- Times up
-- No limit on exponents
-- cannot use n without ;digits notation
-
-
+[ ] Better and more useful tests
+[ ] Refacto
 
 # Fibomachine
 

@@ -1,5 +1,6 @@
 use crate::ast::{self, Ast, Rule, Step, Value};
 use num_bigint::{BigInt, ToBigInt};
+use std::time::Instant;
 
 use crate::error::{Error, ErrorKind};
 
@@ -13,11 +14,13 @@ pub fn execute<'a>(
     limit: usize,
 ) -> Result<&'a mut Sequence, Error> {
     let first_n = sequence.len();
+    let timer = Instant::now();
 
     for n in first_n..limit {
         let mut values: Values = Vec::new();
         for step in ast {
             let Step { value, .. } = step;
+
             let maybe_value: Result<Value, ErrorKind> = match value {
                 Value::Operation { value, inputs } => extract_operation(&values, value, inputs),
                 Value::Function { name, inputs } => {
@@ -39,6 +42,11 @@ pub fn execute<'a>(
         }
         let term = values.pop().unwrap();
         sequence.push(term);
+
+        // Timeout
+        if timer.elapsed().as_millis() > 50 {
+            return Ok(sequence);
+        }
     }
     Ok(sequence)
 }
@@ -96,16 +104,17 @@ fn extract_function(
     }
 }
 
-fn op_exp(a: &BigInt, b: &BigInt) -> Option<BigInt> {
+fn op_exp(a: &BigInt, b: &BigInt) -> Result<BigInt, ErrorKind> {
     let (_, digits) = b.to_u32_digits();
     if digits.len() > 1 {
-        return None;
+        return Err(ErrorKind::BigExponent);
     };
-    let exponent = digits[0];
+
+    let exponent = if digits.len() == 0 { 0 } else { digits[0] };
     if exponent > 1000 {
-        return None;
+        return Err(ErrorKind::BigExponent);
     }
-    Some(a.pow(digits[0]))
+    Ok(a.pow(exponent))
 }
 
 fn extract_operation(
@@ -135,10 +144,15 @@ fn extract_operation(
             Rule::op_mul => Some(a * b),
             Rule::op_div => Some(a / b),
             Rule::op_mod => Some(a % b),
-            Rule::op_exp => op_exp(a, b),
             _ => None,
         } {
             return Ok(Value::Number { value });
+        }
+        if let Rule::op_exp = operation {
+            return match op_exp(a, b) {
+                Ok(value) => Ok(Value::Number { value }),
+                Err(err) => Err(err),
+            };
         }
     }
     if let Some((a, b)) = as_boolean(a, b) {

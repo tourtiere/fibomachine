@@ -94,5 +94,7 @@ fn check_fibonacci_sequence_strip() {
 
 #[test]
 fn check_first_terms() {
-    assert_eq!(run("a(n-1)+a(n-2);0,1,2 +2", 3).unwrap(), "\"0\",\"1\",\"2\"");
+    assert_eq!(run("a(n-1)+a(n-2);0,1,2 ", 3).unwrap(), "\"0\",\"1\",\"2\"");
 }
+
+

@@ -8,6 +8,7 @@ pub enum ErrorKind {
     Undefined,
     Type,
     OutOfBounds,
+    BigExponent,
 }
 #[derive(Debug)]
 pub struct Error {
@@ -24,6 +25,7 @@ impl fmt::Display for Error {
             ErrorKind::Undefined => "Undefined",
             ErrorKind::Type => "Type",
             ErrorKind::OutOfBounds => "OutOfBounds",
+            ErrorKind::BigExponent => "BigExponent",
         };
         write!(
             f,
