@@ -2,16 +2,16 @@
 
 expression {
   Int | 
-  Identifier |
-  String |
-  RightSide |
+  Function |
+  Index |
+  RightSide
 }
 
 @tokens {
   Int {  $[0-9]+ }    
-  Identifier { $[a-zA-Z]+ $[a-zA-Z_0-9]* }
-  String { '"' (!["\\] | "\\" _)* '"' }
-  RightSide { ";" $[0-1]  }
+  Function {"a" | "if"}
+  Index {"n"}
+  RightSide{ ";" std.whitespace* ( std.digit+  std.whitespace* "," std.whitespace*)*  std.whitespace* std.digit+}
   space { $[ \t\n\r]+ }
   "(" ")"
 }

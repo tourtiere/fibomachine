@@ -1,17 +1,16 @@
-import { foldNodeProp, foldInside, indentNodeProp } from "@codemirror/language";
-import { styleTags, tags as t } from "@codemirror/highlight";
-import { LezerLanguage } from "@codemirror/language";
+import { HighlightStyle, styleTags, tags as t, tags } from "@codemirror/highlight";
+import { foldInside, foldNodeProp, indentNodeProp, LezerLanguage } from "@codemirror/language";
 import { parser } from "./parser";
-import { HighlightStyle, tags } from "@codemirror/highlight";
 
 let parserWithMetadata = parser.configure({
     props: [
         styleTags({
-            Identifier: t.variableName,
+            Index: t.variableName,
+            Function: t.float,
             Boolean: t.bool,
-            String: t.string,
             Int: t.number,
             Application: t.strong,
+            RightSide: t.list,
             "( )": t.paren,
         }),
         indentNodeProp.add({
@@ -34,9 +33,11 @@ const theme = {
 };
 
 export const highlight = HighlightStyle.define([
-    { tag: tags.number, color: theme.blue2 },
-    { tag: tags.variableName, color: theme.orange },
-    { tag: tags.paren, color: theme.green },
+    { tag: tags.number, color: theme.blue1 },
+    { tag: tags.variableName, color: theme.brown },
+    { tag: tags.float, color: theme.green },
+    { tag: tags.paren, color: theme.blue2 },
+    { tag: tags.list, color: theme.purple },
 ]);
 
 export const language = LezerLanguage.define({

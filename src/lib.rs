@@ -18,9 +18,11 @@ pub mod error;
 pub fn parse_first_terms(stack: &str) -> engine::Sequence {
     let mut seq: engine::Sequence = Vec::new();
     for term in stack.split(",") {
-        if let Some(number) = BigInt::parse_bytes(term.as_bytes(), 10) {
+        if let Some(number) = BigInt::parse_bytes(term.trim().as_bytes(), 10) {
             let value = ast::Value::Number { value: number };
             seq.push(value);
+        } else {
+            panic!();
         }
     }
     seq
@@ -36,8 +38,8 @@ pub fn first_parse(input: &str) -> (ast::Ast, engine::Sequence) {
     }
 }
 
-fn json_print(sequence: &Sequence) -> String {
-    let values = sequence
+fn sequence_to_string(sequence: &Sequence) -> String {
+    sequence
         .iter()
         .map(|term| match term {
             ast::Value::Number { value } => value.to_string(),
@@ -53,32 +55,44 @@ fn json_print(sequence: &Sequence) -> String {
         })
         .map(|term| format!("\"{}\"", term))
         .collect::<Vec<String>>()
-        .join(",");
-
-    format!(r#"{{"success":true,"values":[{}]}}"#, values)
+        .join(",")
 }
 
-#[wasm_bindgen]
-pub fn run(input: &str, limit: i32) -> String {
+pub fn run(input: &str, limit: i32) -> Result<String, error::Error> {
     let (ast, mut first_terms) = first_parse(input);
-    let sequence = engine::execute(&ast, &mut first_terms, limit as usize);
-    match sequence {
-        Ok(sequence) => json_print(sequence),
-        Err(err) => format!("{}", err),
+    let maybe_sequence = engine::execute(&ast, &mut first_terms, limit as usize);
+    match maybe_sequence {
+        Ok(sequence) => Ok(sequence_to_string(sequence)),
+        Err(err) => Err(err),
     }
 }
 
+#[wasm_bindgen]
+pub fn run_wasm(input: &str, limit: i32) -> String {
+    match run(input, limit) {
+        Ok(result) => format!(r#"{{"success":true,"values":[{}]}}"#, result),
+        Err(err) => format!("{}", err),
+    }
+}
 #[test]
 fn check_formula() {
-    assert_eq!(run("17/3 + 5*3 - 11", 1), "9");
+    assert_eq!(run("17/3 + 5*3 - 11", 1).unwrap(), "\"9\"");
 }
 
 #[test]
 fn check_fibonacci_sequence() {
-    assert_eq!(run("a(n-1)+a(n-2);0,1", 10), "0,1,1,2,3,5,8,13,21,34");
+    assert_eq!(
+        run("a(n-1)+a(n-2);0,1, 2    ", 3).unwrap(),
+        "\"0\",\"1\",\"2\""
+    );
 }
 
 #[test]
-fn check_out_of_bounds_error() {
-    assert_eq!(run("a(n-1)+a(n-2);0", 3), "error");
+fn check_fibonacci_sequence_strip() {
+    assert_eq!(run("a(n-1)+a(n-2);0,1,2", 3).unwrap(), "\"0\",\"1\",\"2\"");
+}
+
+#[test]
+fn check_first_terms() {
+    assert_eq!(run("a(n-1)+a(n-2);0,1,2 +2", 3).unwrap(), "\"0\",\"1\",\"2\"");
 }

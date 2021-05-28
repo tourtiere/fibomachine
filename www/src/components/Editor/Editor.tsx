@@ -6,29 +6,38 @@ import { useEffect, useRef } from "preact/hooks";
 import { customLinter } from "./customLinter";
 import { highlight, language } from "./language";
 
+function decodeURIComponentSafe(s: string) {
+    return decodeURIComponent(s.replace(/%(?![0-9][0-9a-fA-F]+)/g, "%25"));
+}
 function extractUrl() {
     const url = new URL(window.location.href);
     const paramRaw = url.searchParams.get("i");
     if (!paramRaw) return "";
-    return decodeURIComponent(paramRaw);
+    return decodeURIComponentSafe(paramRaw);
 }
 
 function saveUrl(value: string) {
-    if (value === "") {
-        return window.history.pushState(value, "Fibomachine", ``);
-    }
-    window.history.pushState(value, "Fibomachine", `?i=${encodeURIComponent(value)}`);
+    return window.history.pushState(
+        value,
+        "Fibomachine",
+        value == `` ? "" : `?i=${encodeURIComponent(value)}`
+    );
 }
 
 interface Props {
     onChange: (value: string) => void;
+    wasmLoaded: boolean;
 }
 
 //[your expresssion] ; [first term] , [second term] ...
-export function Editor({ onChange }: Props): JSX.Element {
+export function Editor({ onChange, wasmLoaded }: Props): JSX.Element {
     const codemirrorRef = useRef<HTMLDivElement>(null);
-    const initValue = extractUrl();
+
     useEffect(() => {
+        if (!wasmLoaded) return;
+
+        const initValue = extractUrl();
+        if (initValue !== "") onChange(initValue);
         document.title = `You clicked imes`;
         let editor = new EditorView({
             state: EditorState.create({
@@ -50,7 +59,7 @@ export function Editor({ onChange }: Props): JSX.Element {
             parent: codemirrorRef.current,
         });
         editor.focus();
-    }, []);
+    }, [wasmLoaded]);
 
-    return <div ref={codemirrorRef} />;
+    return <div ref={codemirrorRef} class="editor-wrapper" />;
 }

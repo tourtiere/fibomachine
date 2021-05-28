@@ -1,7 +1,7 @@
+import Home from "components/Home";
+import { Nested } from "components/Nested";
+import { Page } from "components/Page";
 import { h, JSX } from "preact";
-import Home from "components/home/Home";
-import { Nested } from "components/nested/Nested";
-import { Page } from "components/page/Page";
 import { NotFound } from "./NotFound";
 
 type TRoute = {

@@ -2,6 +2,6 @@
 export const
   Program = 1,
   Int = 2,
-  Identifier = 3,
-  String = 4,
+  Function = 3,
+  Index = 4,
   RightSide = 5

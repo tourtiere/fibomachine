@@ -1,6 +1,10 @@
 Todo:
 
-Rust Errors to wasm. Json?
+- Times up
+- No limit on exponents
+- cannot use n without ;digits notation
+
+
 
 # Fibomachine
 
