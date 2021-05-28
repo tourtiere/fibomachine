@@ -4,6 +4,7 @@ import { keymap, placeholder, ViewUpdate } from "@codemirror/view";
 import { h, JSX } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { customLinter } from "./customLinter";
+import "./editor.scss";
 import { highlight, language } from "./language";
 
 function decodeURIComponentSafe(s: string) {

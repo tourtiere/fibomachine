@@ -1,5 +1,6 @@
-import { Component, JSX, h } from "preact";
+import { Component, h, JSX } from "preact";
 import { FiboProvider } from "../providers/fibo";
+import "./app.scss";
 import { router } from "./router";
 
 export class App extends Component {

@@ -25,7 +25,7 @@
 	},
 	"devDependencies": {
 		"copy-webpack-plugin": "^8.0.0",
-		"css-loader": "^5.1.2",
+		"css-loader": "^5.2.6",
 		"file-loader": "^6.2.0",
 		"less": "^4.1.1",
 		"less-loader": "^8.0.0",
@@ -33,6 +33,9 @@
 		"lezer": "^0.13.5",
 		"react-snap": "^1.23.0",
 		"rimraf": "^3.0.2",
+		"sass": "^1.34.0",
+		"sass-loader": "^11.1.1",
+		"style-loader": "^2.0.0",
 		"ts-loader": "^8.0.18",
 		"tsconfig-paths-webpack-plugin": "^3.5.1",
 		"typescript": "^4.2.3",

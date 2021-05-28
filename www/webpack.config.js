@@ -3,9 +3,7 @@ const path = require("path");
 
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-
-
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = (env, args) => {
     const isProduction = args && args["mode"] === "production";
@@ -37,8 +35,11 @@ module.exports = (env, args) => {
         },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".html", ".txt"],
-		    plugins: [new TsconfigPathsPlugin({/* options: see below */})]
-
+            plugins: [
+                new TsconfigPathsPlugin({
+                    /* options: see below */
+                }),
+            ],
         },
         module: {
             rules: [
@@ -54,20 +55,20 @@ module.exports = (env, args) => {
                         },
                     ],
                 },
-                // app main .less file
                 {
-                    test: /app\.less$/i,
+                    test: /\.s[ac]ss$/i,
                     use: [
-                        {
-                            loader: "file-loader",
-                            options: {
-                                name: "styles/[name].css",
-                            },
-                        },
-                        {
-                            loader: "less-loader",
-                        },
+                        // Creates `style` nodes from JS strings
+                        "style-loader",
+                        // Translates CSS into CommonJS
+                        "css-loader",
+                        // Compiles Sass to CSS
+                        "sass-loader",
                     ],
+                },
+                {
+                    test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                    type: "asset/resource",
                 },
             ],
         },

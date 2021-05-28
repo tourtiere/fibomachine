@@ -1,0 +1,15 @@
+.editor-wrapper {
+    height: 31px;
+    padding: 0px 7px;
+    font-size: 17px;
+    font-family: Arial, monospace;
+    border: 1px solid#888888;
+    border-radius: 5px;
+
+    border-color: rgba(223, 225, 229, 0);
+    box-shadow: 0 1px 6px rgb(32 33 36 / 28%);
+}
+
+.cm-focused {
+    outline: none !important;
+}

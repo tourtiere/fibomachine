@@ -34,7 +34,7 @@ const theme = {
 
 export const highlight = HighlightStyle.define([
     { tag: tags.number, color: theme.blue1 },
-    { tag: tags.variableName, color: theme.brown },
+    { tag: tags.variableName, color: theme.green },
     { tag: tags.float, color: theme.green },
     { tag: tags.paren, color: theme.blue2 },
     { tag: tags.list, color: theme.purple },
